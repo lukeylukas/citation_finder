@@ -1,0 +1,1 @@
+citation_finder is a tool used for finding scripture citations in texts.
