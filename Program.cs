@@ -124,10 +124,112 @@ namespace Finder
             MatchCollection matches = Regex.Matches(file_contents, pattern);
             for (int i = 0; i < matches.Count; i++)
             {
-                Console.WriteLine(matches[i].Value);
+                string[] tokens = SplitToTokens(matches[i].Value);
+                string scriptureReference = ConvertTokensToReference(tokens);
             }
+            
+            // string[] refs = new string[matches.Count];
+            // for (int i = 0; i < matches.Count; i++)
+            // {
+            //     refs[i] = matches[i].Value;
+            // }
             return null;
         }
-    }  
+        static string[] SplitToTokens(string reference)
+        {
+            string[] tokens = new string[0];
+
+            reference = reference.Replace(" ", "").Replace(".", "");
+
+            int charType = 0;
+            int lastSplitIndex = -1;
+            for (int i = 0; i < reference.Length; i++)
+            {
+                int newCharType = 0;
+                if (char.IsLetter(reference[i]))
+                {
+                    newCharType = 1;
+                }
+                else if (char.IsNumber(reference[i]))
+                {
+                    newCharType = 2;
+                }
+                else if (reference[i] == ':')
+                {
+                    newCharType = 3;
+                }
+                else if (reference[i] == '.')
+                {
+                    newCharType = 4;
+                }
+                else if (reference[i] == ',')
+                {
+                    newCharType = 5;
+                }
+                else if (reference[i] == '-')
+                {
+                    newCharType = 6;
+                }
+                else
+                {
+                    newCharType = 0;
+                    throw new Exception("Invalid character in reference: " + reference);
+                }
+                if (newCharType != charType && i > 0)
+                {
+                    //tokens.Add(reference.Substring(lastSplitIndex, i - lastSplitIndex));
+                    tokens[tokens.Length] = reference.Substring(lastSplitIndex, i - lastSplitIndex);
+                    lastSplitIndex = i;
+                    charType = newCharType;
+                }
+            }
+            return tokens;
+        }
+        static string ConvertTokensToReference(string[] tokens)
+        {
+            return "";
+            // ensure book name with optional number in front is valid.
+                // create a tree of letters and numbers where each node contains a spot for all letters and numbers, 
+                // and an indicator of whether it is the end of a valid book name/abbreviation.
+            
+            // ensure chapter number is valid.
+            // ensure verse number is valid.
+            // ensure the range of referenced verses is valid.
+
+        }
+    }
+    private class BookNode
+    {
+        public int Value = -1;
+        public BookNode[] Children { get; }
+
+        public BookNode()
+        {
+            Children = new BookNode[36]; // 26 alphabetical nodes (a-z) and 10 numeric nodes (0-9)
+        }
+    }
+    private class BookTree
+    {
+        public BookNode Root { get; }
+        public BookTree()
+        {
+            Root = new BookNode();
+        }
+        public void AddBook(string abbreviation, int bookIndex)
+        {
+            BookNode currentNode = Root;
+            abbreviation = abbreviation.ToLower();
+            for (int index = 0; index < abbreviation.Length; index++)
+            {
+                if (currentNode.Children[index] == null)
+                {
+                    currentNode.Children[index] = new BookNode();
+                }
+                currentNode = currentNode.Children[index];
+            }
+            currentNode.Value = bookIndex;
+        }
+    }
+        
 }
             
